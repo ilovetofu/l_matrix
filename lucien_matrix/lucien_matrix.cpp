@@ -49,7 +49,10 @@ int main()
     
     //while (true) { update(); }
     
-    fill_gap_animation(1, 0.1f, 1.0f);
+    fill_gap_animation(0, 0.5f, 1.0f);
+    generate_subtick_pattern(0, 0);
+    generate_subtick_pattern(0, 1);
+    display();
 
     return 0;
 }
@@ -116,11 +119,19 @@ void fill_gap_animation(int node, float start_intensity, float end_intensity) {
 
 void generate_subtick_pattern(int node, int animation_tick) {
     float temp = lights[node].animation[animation_tick];
+    int n_on = 0;
     for (int i = 0; i < subticks; i++) {
         if (temp <= (i * (1 / subticks))) {
-
+            n_on = i;
         }
+        //clear old pattern
+        lights[node].on_subtick[i] = 0;
     }
+    //write new pattern, better ditribution needed
+    for (int i = 0; i < n_on; i++) {
+        lights[node].on_subtick[i] = true;
+    }
+
 }
 
 bool node_on_tick(int node, int subtick) {
@@ -131,11 +142,22 @@ bool node_on_tick(int node, int subtick) {
 }
 
 void display() {
-    for (int subtick = 0; subtick < 12; subtick++) {
+    for (int an_pattern= 0; an_pattern < 10; an_pattern++) {
         for (int i = 0; i < nodes; i++) {
-            if (node_on_tick(i, subtick)) {
-                //pin->on/off
+            generate_subtick_pattern(i, an_pattern);
+        }
+        for (int subtick = 0; subtick < 12; subtick++) {
+            std::cout << "subtick: " << subtick << std::endl;
+            for (int i = 0; i < nodes; i++) {
+                if (node_on_tick(i, subtick)) {
+                    std::cout << "node " << i << ":  On" << std::endl;
+                    //pin->on/off
+                }
+                else {
+                    std::cout << "node " << i << ":  Off" << std::endl;
+                }
             }
         }
+        std::cout << std::endl;
     }
 }
